@@ -364,7 +364,7 @@ def run_dashboard_demonstration():
     print("  - REST API for programmatic access")
 
     print("\nTo run the actual web dashboard:")
-    print("  flask --app research_dashboard run --port 5000")
+    print("  flask --app session4/04_research_dashboard.py run --port 5000")
     print("Then visit http://localhost:5000 in your browser")
 
 

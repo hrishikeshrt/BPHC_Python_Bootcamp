@@ -36,7 +36,7 @@ class BatchExperimentProcessor:
         parser = argparse.ArgumentParser(
             description="Batch Process Multiple Experiments",
             epilog=(
-                "Example: python batch_processor.py "
+                "Example: python session3/02_batch_processor.py "
                 "--input-dir experiments/ --output-dir results/"
             ),
         )

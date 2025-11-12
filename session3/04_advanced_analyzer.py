@@ -35,9 +35,9 @@ class ResearchDataAnalyzer:
             formatter_class=argparse.RawDescriptionHelpFormatter,
             epilog="""
 Examples:
-  python advanced_analyzer.py -i data.csv --stats --plot
-  python advanced_analyzer.py -i data.csv --trends --correlations
-  python advanced_analyzer.py -i data.csv --filter "Temperature > 25" --verbose
+  python session3/04_advanced_analyzer.py -i engineering_test_data.csv --stats --plot
+  python session3/04_advanced_analyzer.py -i engineering_test_data.csv --trends --correlations
+  python session3/04_advanced_analyzer.py -i engineering_test_data.csv --filter "Temperature_C > 25" --verbose
             """,
         )
 
