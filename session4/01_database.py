@@ -29,6 +29,9 @@ from sqlalchemy.orm import sessionmaker
 
 ###############################################################################
 
+RNG_SEED = 42
+np.random.seed(RNG_SEED)
+
 Base = declarative_base()
 
 

@@ -19,6 +19,9 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
+RNG_SEED = 42
+np.random.seed(RNG_SEED)
+
 ###############################################################################
 
 

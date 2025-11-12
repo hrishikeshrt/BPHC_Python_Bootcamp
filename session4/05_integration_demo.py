@@ -20,6 +20,9 @@ import pandas as pd
 
 ###############################################################################
 
+RNG_SEED = 42
+np.random.seed(RNG_SEED)
+
 
 class IntegratedResearchSystem:
     """

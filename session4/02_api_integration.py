@@ -19,6 +19,9 @@ import numpy as np
 
 ###############################################################################
 
+RNG_SEED = 42
+np.random.seed(RNG_SEED)
+
 
 class ResearchDataAPI:
     """Base class for research data API integration"""

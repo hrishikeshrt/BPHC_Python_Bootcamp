@@ -14,6 +14,9 @@ import os
 import pandas as pd
 import numpy as np
 
+RNG_SEED = 42
+np.random.seed(RNG_SEED)
+
 ###############################################################################
 
 
