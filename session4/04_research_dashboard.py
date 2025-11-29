@@ -24,6 +24,10 @@ from datetime import datetime
 
 import pandas as pd
 import numpy as np
+import matplotlib
+
+# Use a non-interactive backend so plots work safely in web requests
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from flask import Flask, render_template, request, jsonify, send_file
 
@@ -170,18 +174,47 @@ dashboard = ResearchDashboard()
 @app.route("/")
 def index():
     """Main dashboard page"""
-    experiments_info = []
+    experiments_html_parts = []
 
     for exp_name, exp_data in dashboard.experiments.items():
         df = pd.DataFrame(exp_data)
-        experiments_info.append(
-            {
-                "name": exp_name,
-                "columns": list(df.columns),
-                "data_points": len(df),
-                "description": f"{exp_name.replace('_', ' ').title()} Data",
-            }
+        columns = list(df.columns)
+        description = f"{exp_name.replace('_', ' ').title()} Data"
+        options_html = "".join(
+            f"<option value='{col}'>{col}</option>" for col in columns
         )
+        experiments_html_parts.append(
+            f"""
+        <div class="experiment">
+            <h3>{exp_name.replace('_', ' ').title()}</h3>
+            <p>{description} - {len(df)} data points</p>
+            <p>Columns: {', '.join(columns)}</p>
+            <button onclick="analyzeExperiment('{exp_name}', 'basic_stats')">Basic Statistics</button>
+            <button onclick="analyzeExperiment('{exp_name}', 'trend_analysis')">Trend Analysis</button>
+            <div style="margin-top: 10px;">
+                <label>
+                    X:
+                    <select id="xcol-{exp_name}">
+                        {options_html}
+                    </select>
+                </label>
+                <label>
+                    Y:
+                    <select id="ycol-{exp_name}">
+                        {options_html}
+                    </select>
+                </label>
+                <button onclick="plotFromSelect('{exp_name}')">
+                    Plot
+                </button>
+            </div>
+            <div id="results-{exp_name}"></div>
+            <div id="plot-{exp_name}"></div>
+        </div>
+        """
+        )
+
+    experiments_html = "\n".join(experiments_html_parts)
 
     return f"""
     <html>
@@ -199,17 +232,7 @@ def index():
         <p>Interactive dashboard for research data analysis and visualization</p>
 
         <h2>Available Experiments</h2>
-        {''.join([f'''
-        <div class="experiment">
-            <h3>{exp['name'].replace('_', ' ').title()}</h3>
-            <p>{exp['description']} - {exp['data_points']} data points</p>
-            <p>Columns: {', '.join(exp['columns'])}</p>
-            <button onclick="analyzeExperiment('{exp['name']}', 'basic_stats')">Basic Statistics</button>
-            <button onclick="analyzeExperiment('{exp['name']}', 'trend_analysis')">Trend Analysis</button>
-            <div id="results-{exp['name']}"></div>
-            <div id="plot-{exp['name']}"></div>
-        </div>
-        ''' for exp in experiments_info])}
+        {experiments_html}
 
         <script>
         function analyzeExperiment(experimentName, analysisType) {{
@@ -226,6 +249,15 @@ def index():
                 document.getElementById('results-' + experimentName).innerHTML =
                     '<h4>Analysis Results:</h4><pre>' + JSON.stringify(data, null, 2) + '</pre>';
             }});
+        }}
+
+        function plotFromSelect(experimentName) {{
+            const xSelect = document.getElementById('xcol-' + experimentName);
+            const ySelect = document.getElementById('ycol-' + experimentName);
+            if (!xSelect || !ySelect) return;
+            const xCol = xSelect.value;
+            const yCol = ySelect.value;
+            createPlot(experimentName, xCol, yCol);
         }}
 
         function createPlot(experimentName, xCol, yCol) {{
