@@ -96,7 +96,21 @@ class ResearchDatabase:
         start_date=None,
         end_date=None,
     ):
-        """Create a new experiment record"""
+        """Create a new experiment record
+
+        If an experiment with the same ``experiment_id`` already exists,
+        return the existing record instead of raising an error. This makes
+        the demonstration script safe to run multiple times.
+        """
+        # Check for existing experiment first (idempotent behaviour for the demo)
+        existing = (
+            self.session.query(ResearchExperiment)
+            .filter_by(experiment_id=experiment_id)
+            .first()
+        )
+        if existing is not None:
+            return existing
+
         experiment = ResearchExperiment(
             experiment_id=experiment_id,
             title=title,

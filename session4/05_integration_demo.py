@@ -82,18 +82,20 @@ def mock_api_data(days: int = 5) -> pd.DataFrame:
     return df
 
 
+def parallel_job(args: tuple[int, int]) -> float:
+    """Worker function for parallel jobs (top-level for pickling)"""
+    seed, samples = args
+    rng = np.random.default_rng(seed)
+    data = rng.normal(loc=0.0, scale=1.0, size=samples)
+    return float(np.mean(data))
+
+
 def run_parallel_jobs(num_jobs: int = 6, samples: int = 50_000):
     """Simple CPU-bound jobs to demonstrate multiprocessing"""
-
-    def job(seed: int) -> float:
-        rng = np.random.default_rng(seed)
-        data = rng.normal(loc=0.0, scale=1.0, size=samples)
-        return float(np.mean(data))
-
     start = time.time()
-    seeds = [RNG_SEED + i for i in range(num_jobs)]
+    args = [(RNG_SEED + i, samples) for i in range(num_jobs)]
     with ProcessPoolExecutor() as pool:
-        results = list(pool.map(job, seeds))
+        results = list(pool.map(parallel_job, args))
     elapsed = time.time() - start
     print(f"[PARALLEL] {num_jobs} jobs finished in {elapsed:.2f}s")
     return results, elapsed
