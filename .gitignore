@@ -17,3 +17,12 @@ build/
 .venv*/
 assets/bits_pilani_logo_faint.png
 assets/bits_pilani_logo.png
+
+# Generated analysis and demo outputs
+advanced_results/
+analysis_results/
+batch_results/
+integrated_output/
+test_experiments/
+weather_analysis_data.csv
+thermal_data_export.csv
