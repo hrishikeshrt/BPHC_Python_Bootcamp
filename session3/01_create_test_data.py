@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Test Data Creation
-Create sample experiment data for testing the analyzers
+Test Data Creation (used by many examples)
+
+Creates one main CSV file plus a small folder of experiment
+files.
+
+Note:
+- Do not worry about the mathematics.
+- Treat this script purely as a  data generator for the rest of the session.
 
 @author: Hrishikesh Terdalkar
 """
@@ -119,15 +125,15 @@ def main():
     print("Created multiple experiment files in 'experiments/' directory")
 
     print("\nTest data creation complete!")
-    print("\nUsage examples:")
+    print("\nNext steps (common scripts):")
     print(
-        "  python basic_analyzer.py engineering_test_data.csv --stats --verbose"
+        "  python session3/03_batch_processor.py --input-dir experiments --output-dir batch_results --summary"
     )
     print(
-        "  python advanced_analyzer.py -i engineering_test_data.csv --stats --trends --plot"
+        "  python session3/04_basic_analyzer.py engineering_test_data.csv --stats --verbose"
     )
     print(
-        "  python batch_processor.py --input-dir experiments/ --output-dir batch_results --summary"
+        "  python session3/05_advanced_analyzer.py -i engineering_test_data.csv --stats --trends --plot"
     )
 
 

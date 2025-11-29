@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Parallel Processing for Research
-Optimizing performance for computationally intensive tasks
+Parallel Processing for Research (intermediate)
+
+Goal: show how running the same calculation many times
+can be sped up by using multiple CPU cores.
+
+You do not need to understand every detail of the Monte
+Carlo examples - focus on the difference between the
+sequential and parallel timings printed by the script.
 
 @author: Hrishikesh Terdalkar
 """

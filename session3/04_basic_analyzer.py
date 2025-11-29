@@ -39,7 +39,7 @@ def setup_basic_parser():
     parser = argparse.ArgumentParser(
         description="Basic Research Data Analyzer",
         epilog=(
-            "Example: python session3/03_basic_analyzer.py "
+            "Example: python session3/04_basic_analyzer.py "
             "engineering_test_data.csv --stats --output results"
         ),
     )

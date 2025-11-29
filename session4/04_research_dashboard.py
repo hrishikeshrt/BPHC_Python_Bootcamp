@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Research Dashboard with Flask
-Web interface for research tools and data visualization
+Research Dashboard with Flask (advanced / optional)
+
+This script is a larger example that combines several
+ideas from the rest of Session 4 into a small web app.
+
+If you are just starting with Python, treat this as a
+preview. You can run it and click around without fully
+understanding the internals yet.
 
 @author: Hrishikesh Terdalkar
 """

@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Advanced Research Data Analyzer
-Comprehensive tool with multiple analysis options
+Advanced Research Data Analyzer (optional / stretch)
+
+This script shows more realistic analysis options
+for students who are already comfortable with
+basic Python and pandas. If you are new to Python,
+you can safely treat this as an optional example.
 
 @author: Hrishikesh Terdalkar
 """
@@ -33,11 +37,11 @@ class ResearchDataAnalyzer:
         parser = argparse.ArgumentParser(
             description="Advanced Research Data Analyzer",
             formatter_class=argparse.RawDescriptionHelpFormatter,
-            epilog="""
+            epilog=f"""
 Examples:
-  python session3/04_advanced_analyzer.py -i engineering_test_data.csv --stats --plot
-  python session3/04_advanced_analyzer.py -i engineering_test_data.csv --trends --correlations
-  python session3/04_advanced_analyzer.py -i engineering_test_data.csv --filter "Temperature_C > 25" --verbose
+  python {__file__} -i engineering_test_data.csv --stats --plot
+  python {__file__} -i engineering_test_data.csv --trends --correlations
+  python {__file__} -i engineering_test_data.csv --filter "Temperature_C > 25" --verbose
             """,
         )
 

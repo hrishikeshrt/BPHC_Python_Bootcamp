@@ -1,0 +1,303 @@
+\documentclass[12pt]{article}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{listingsutf8}
+\usepackage{xcolor}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{FiraMono}
+\usepackage{tikz}
+\usepackage{transparent}
+\usepackage[firstpage=false]{draftwatermark}
+
+\usepackage[sfdefault,light]{FiraSans}
+\renewcommand{\familydefault}{\sfdefault}  % Set sans-serif font as the default
+\newcommand{\md}{\firamedium}
+\renewcommand{\textmd}[1]{{\firamedium #1}}
+
+\geometry{a4paper, margin=1in}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Python Bootcamp - Session 3}
+\lhead{Practical Python Programming}
+
+% Python style for listings
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.96,0.96,0.94}
+
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\linespread{0.95}\selectfont\ttfamily\scriptsize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    columns=fullflexible,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    frame=single,
+    framesep=6pt,
+    rulecolor=\color{black!10}
+}
+
+\lstset{style=pythonstyle,inputencoding=utf8}
+
+% Remove tiny white gaps between colored code lines
+\setlength{\fboxsep}{0pt}
+\setlength{\fboxrule}{0pt}
+
+\SetWatermarkText{\includegraphics[width=0.5\paperwidth]{assets/bits_pilani_logo_faint.png}}
+\SetWatermarkScale{1}
+% \SetWatermarkLightness{1}
+\SetWatermarkAngle{0}
+
+\begin{document}
+
+\title{{\Large \textmd{Python Bootcamp - Session 3}}\\Practical Python Programming}
+\author{Hrishikesh Terdalkar}
+\date{November 30, 2025}
+
+\maketitle
+
+\section*{Session Overview}
+Session 3 moves beyond syntax drills and focuses on the practical workflows you need for day-to-day research. Each module demonstrates how to collect data, keep it tidy, and automate common analyses so results are reproducible. The emphasis throughout is on hands-on practice with file handling, command-line tooling, and batch processing.
+
+\section*{What You Will Build}
+\begin{itemize}
+    \item A small, reproducible dataset pack for hands-on analysis.
+    \item A batch analysis CLI that scans folders and emits JSON summaries.
+    \item Two analyzers (basic/advanced) that compute stats, detect trends, and optionally plot.
+    \item Cleaned CSV and JSON artefacts ready to reuse in Session 4.
+\end{itemize}
+
+\section*{Session Plan}
+\begin{itemize}
+    \item Environment check and data generation.
+    \item File operations lab (manual vs pandas) and JSON metadata.
+    \item Batch CLI lab (discover, process, summarise).
+    \item Basic analyzer lab (descriptive statistics + outputs).
+    \item Advanced analyzer lab (filters, trends, correlations, plots).
+    \item Wrap-up, reproducibility notes, and preview of Session 4.
+\end{itemize}
+
+\section*{Skills You'll Practice}
+\begin{itemize}
+    \item Structure Python programs so future-you can understand them at a glance.
+    \item Compare manual and pandas-based file handling and know when to reach for each.
+    \item Create reusable helper functions and document them via docstrings.
+    \item Work with CSV and JSON without having to open Excel or a browser.
+    \item Build approachable CLIs with argparse, including help text and defaults.
+    \item Automate batch processing so routine analysis takes seconds, not evenings.
+\end{itemize}
+
+\section*{Learning Outcomes}
+By the end of this session, you should be able to:
+\begin{itemize}
+    \item Load, inspect, and export tabular data without a notebook.
+    \item Write friendly CLIs with clear flags and \texttt{-{}-help} text.
+    \item Automate repetitive processing across many CSV files.
+    \item Produce reproducible JSON/CSV outputs that others can audit.
+\end{itemize}
+\clearpage
+
+\section*{Theory Essentials}
+\begin{itemize}
+    \item \textbf{CSV vs JSON}: CSV is row/column data for tables; JSON is hierarchical and ideal for metadata and configuration.
+    \item \textbf{Pandas DataFrames}: Think of them as spreadsheets with powerful indexing and vectorised operations.
+    \item \textbf{CLI design}: Prefer explicit flags (e.g. \texttt{-{}-input}, \texttt{-{}-output}) and helpful \texttt{-{}-help} messages.
+    \item \textbf{Descriptive statistics}: Mean, median, standard deviation, and range establish baselines before advanced modelling.
+    \item \textbf{Trends \& correlations}: Linear fits and correlation matrices are quick sanity checks for relationships between variables.
+\end{itemize}
+
+\noindent Quick checks you can run on any numeric CSV:
+\begin{lstlisting}[language=Python, caption={Fast EDA checklist}]
+import pandas as pd
+df = pd.read_csv("engineering_test_data.csv")
+print(df.describe())            # central tendency + spread
+print(df.corr(numeric_only=True))  # relationships between variables
+\end{lstlisting}
+
+\section*{Prerequisites and Setup}
+Use a managed environment so dependencies stay isolated. If you have Conda/Mamba, this is the simplest route:
+\begin{lstlisting}[language=bash, caption={Recommended: Conda/Mamba environment}]
+# with conda
+conda create -n pybootcamp python=3.10 -y
+conda activate pybootcamp
+
+# or with mamba
+mamba create -n pybootcamp python=3.10 -y
+mamba activate pybootcamp
+
+pip install -r requirements.txt
+make data   # generate shared CSVs for this session
+\end{lstlisting}
+If you prefer, a standard virtualenv also works; the scripts themselves don't depend on Conda-specific features.
+
+\section*{Reproducibility}
+
+Synthetic data and randomised examples are seeded so that every run produces the same values. If you want different noise each time, change the seed once at the top of the script.
+\begin{lstlisting}[language=Python, caption={Deterministic randomness}]
+import numpy as np
+RNG_SEED = 42
+np.random.seed(RNG_SEED)
+\end{lstlisting}
+
+\section*{Data Dictionary}
+The main CSV produced by the data generator is \texttt{engineering\_test\_data.csv}.
+\begin{center}
+\begin{tabular}{ll}
+\textbf{Column} & \textbf{Meaning} \\
+\hline
+Time\_min & Elapsed time in minutes from experiment start \\
+Temperature\_C & Temperature in degrees Celsius \\
+Pressure\_kPa & Pressure in kilopascals \\
+Flow\_Rate\_Lmin & Volumetric flow rate in litres per minute \\
+Vibration\_mm & Peak vibration amplitude in millimetres \\
+\end{tabular}
+\end{center}
+
+\section*{How to Run the Examples}
+\begin{enumerate}
+    \item Generate datasets: \texttt{make data} or \texttt{python session3/01\_create\_test\_data.py}.
+    \item Explore file operations: open \texttt{session3/02\_file\_operations.py} and run the main function.
+    \item Automate batch analysis: run the batch processor with \texttt{-{}-summary} and \texttt{-{}-verbose}.
+    \item Compare basic and advanced analyzers on the same CSV; try adding \texttt{-{}-plot} and a simple filter.
+\end{enumerate}
+
+\section*{Practice Exercises}
+\begin{enumerate}
+    \item Add a new column to \texttt{engineering\_test\_data.csv} (e.g. a moving average of temperature) and update the analyzers to compute its statistics.
+    \item Modify the batch processor so it also saves a compact Markdown summary next to each JSON report.
+    \item Extend the advanced analyzer filter to support expressions like \texttt{"Temperature\_C between 22 and 30"}.
+\end{enumerate}
+
+\section*{Lab Guide}
+\subsection{01\_create\_test\_data.py}
+\begin{itemize}
+    \item Produces the canonical \texttt{engineering\_test\_data.csv}.
+    \item Builds an \texttt{experiments/} folder with multiple experiment types for batch tests.
+    \item Can be rerun at any point to reset the workspace.
+\end{itemize}
+
+\subsection{02\_file\_operations.py}
+\begin{itemize}
+    \item Generates tidy time/temperature/pressure lists.
+    \item Saves/loads CSV data both manually (\texttt{csv.writer}) and via pandas.
+    \item Stores experiment metadata in a JSON file for later reuse.
+\end{itemize}
+
+\subsection{03\_batch\_processor.py}
+\begin{itemize}
+    \item Discovers CSV files with \texttt{glob} and processes them with pandas.
+    \item Uses \texttt{argparse} switches such as \texttt{-{}-summary} and \texttt{-{}-verbose}, reinforcing good CLI hygiene.
+    \item Emits per-experiment JSON plus an optional batch summary for a quick debrief e-mail.
+\end{itemize}
+
+\noindent A representative CLI skeleton:
+\begin{lstlisting}[language=Python, caption={Command-line entry point pattern}]
+def main():
+    parser = build_parser()
+    args = parser.parse_args()
+
+    if not os.path.exists(args.input_dir):
+        print(f"Error: Input directory '{args.input_dir}' not found")
+        sys.exit(1)
+
+    os.makedirs(args.output_dir, exist_ok=True)
+    experiment_files = find_experiment_files(
+        args.input_dir, args.file_pattern, verbose=args.verbose
+    )
+
+    all_results = []
+    for path in experiment_files:
+        result = process_single_experiment(
+            path, args.output_dir, verbose=args.verbose
+        )
+        all_results.append(result)
+
+    if args.summary:
+        generate_batch_summary(all_results, args.output_dir)
+
+if __name__ == "__main__":
+    main()
+\end{lstlisting}
+
+\subsection{04\_basic\_analyzer.py}
+\begin{itemize}
+    \item Reads a single CSV (typically \texttt{engineering\_test\_data.csv}).
+    \item Computes mean/median/std/min/max/range for every numeric column.
+    \item Prints a lightweight summary and stores it as \texttt{analysis.json}.
+\end{itemize}
+
+\subsection{05\_advanced\_analyzer.py}
+\begin{itemize}
+    \item Adds trend analysis, correlations, filtering, and optional plotting.
+    \item Supports data export (\texttt{-{}-export-csv}) so plots and processed data stay in sync.
+    \item Keeps the CLI style identical to the basic analyzer, making upgrades painless for end users.
+    \item Demonstrates how to extend your tooling without rewriting everything from scratch.
+\end{itemize}
+
+\section*{Best Practices}
+
+\subsection{Error Handling}
+\begin{itemize}
+    \item Wrap file I/O in \texttt{try/except} blocks and print clear messages that include the path.
+    \item Validate CLI inputs (paths, flags, column names) early; exit with non-zero status on errors.
+    \item Prefer explicit defaults and \texttt{-v/--verbose} to make scripts self-explanatory during runs.
+\end{itemize}
+
+\subsection{Documentation}
+\begin{itemize}
+    \item Add docstrings with one-line purpose and key parameters/returns.
+    \item Provide \texttt{--help} examples in argparse epilogues so learners can copy/paste.
+    \item Use type hints for function signatures to aid beginners and editors.
+\end{itemize}
+
+\section*{Common Pitfalls}
+\begin{itemize}
+    \item \textbf{CSV headers}: Ensure column names match exactly (case and underscores) when filtering or plotting.
+    \item \textbf{Paths}: Prefer relative paths so your scripts work regardless of the working directory.
+    \item \textbf{Verbose mode}: Use \texttt{-v} to reveal what a script is doing before you trust its outputs.
+\end{itemize}
+
+\section*{Further Reading}
+\begin{itemize}
+    \item Official Python tutorial: \url{https://docs.python.org/3/tutorial/}
+    \item Gentle Python overview: \url{https://www.w3schools.com/python/}
+    \item Practical examples and articles: \url{https://realpython.com/}
+    \item pandas documentation (data analysis): \url{https://pandas.pydata.org/docs/}
+\end{itemize}
+
+\clearpage
+\section*{Appendix: Full Code Listings}
+
+\subsection*{session3/01\_create\_test\_data.py}
+\lstinputlisting[language=Python, caption={Reproducible test data generator}]{session3/01_create_test_data.py}
+
+\subsection*{session3/02\_file\_operations.py}
+\lstinputlisting[language=Python, caption={File operations and JSON metadata}]{session3/02_file_operations.py}
+
+\subsection*{session3/03\_batch\_processor.py}
+\lstinputlisting[language=Python, caption={Batch processing CLI}]{session3/03_batch_processor.py}
+
+\subsection*{session3/04\_basic\_analyzer.py}
+\lstinputlisting[language=Python, caption={Basic research analyzer}]{session3/04_basic_analyzer.py}
+
+\subsection*{session3/05\_advanced\_analyzer.py}
+\lstinputlisting[language=Python, caption={Advanced analyzer with trends and plots}]{session3/05_advanced_analyzer.py}
+
+\end{document}

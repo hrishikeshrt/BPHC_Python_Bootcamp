@@ -1,0 +1,275 @@
+\documentclass[12pt]{article}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{listingsutf8}
+\usepackage{xcolor}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{FiraMono}
+\usepackage{tikz}
+\usepackage{transparent}
+\usepackage[firstpage=false]{draftwatermark}
+
+\usepackage[sfdefault,light]{FiraSans}
+\renewcommand{\familydefault}{\sfdefault}  % Set sans-serif font as the default
+\newcommand{\md}{\firamedium}
+\renewcommand{\textmd}[1]{{\firamedium #1}}
+
+\geometry{a4paper, margin=1in}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Python Bootcamp - Session 4}
+\lhead{Python Integration with Other Technologies}
+
+% Python style for listings
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.96,0.96,0.94}
+
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\linespread{0.95}\selectfont\ttfamily\scriptsize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    columns=fullflexible,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    frame=single,
+    framesep=6pt,
+    rulecolor=\color{black!10}
+}
+
+\lstset{style=pythonstyle,inputencoding=utf8}
+\setlength{\fboxsep}{0pt}
+\setlength{\fboxrule}{0pt}
+
+\SetWatermarkText{\includegraphics[width=0.5\paperwidth]{assets/bits_pilani_logo_faint.png}}
+\SetWatermarkScale{1}
+% \SetWatermarkLightness{1}
+\SetWatermarkAngle{0}
+
+\begin{document}
+
+\title{{\Large \textmd{Python Bootcamp - Session 4}}\\Python Integration with Other Technologies}
+\author{Hrishikesh Terdalkar}
+\date{November 30, 2025}
+
+\maketitle
+
+\section*{Session Overview}
+Session 4 builds on the shared datasets from the previous session and demonstrates how to integrate them with databases, external data sources, parallel compute, and a lightweight dashboard. The goal is to provide a complete reference workflow that you can adapt to your own research problems.
+
+\section*{What You Will Build}
+\begin{itemize}
+    \item A SQLite-backed store of the Session 3 datasets using SQLAlchemy models.
+    \item A small API collector that fetches (or mocks) external context and analyses it.
+    \item A parallel Monte Carlo benchmark with a side-by-side sequential comparison.
+    \item A minimal Flask dashboard that exposes analysis results as HTML and JSON.
+    \item An integration script that ties all pieces together and writes a report.
+\end{itemize}
+
+\section*{Session Plan}
+\begin{itemize}
+    \item Database ingest and quick statistics.
+    \item API integration (mock weather/material properties) and CSV export.
+    \item Parallel processing demo and speedup discussion.
+    \item Dashboard walkthrough (CLI mode first, optional Flask run).
+    \item Integration demo and report generation.
+\end{itemize}
+
+\section*{Skills You'll Practice}
+\begin{itemize}
+    \item Persisting experiment data with SQLAlchemy models (SQLite).
+    \item Designing small API clients, handling JSON, and saving tidy CSVs.
+    \item Running CPU-bound work in parallel and interpreting speedups.
+    \item Exposing analysis via a minimal Flask dashboard and JSON routes.
+    \item Integrating outputs across tools and generating a final report.
+\end{itemize}
+
+\section*{Learning Outcomes}
+By the end of this session, you should be able to:
+\begin{itemize}
+    \item Create and query a SQLite database using SQLAlchemy ORM classes.
+    \item Collect or mock external API data and analyze simple trends.
+    \item Compare sequential vs parallel runs and reason about efficiency.
+    \item Serve analyses over HTTP (Flask) and export artefacts on demand.
+    \item Produce an end-to-end integration report from combined components.
+\end{itemize}
+\clearpage
+\section*{Theory Essentials}
+\begin{itemize}
+    \item \textbf{ORM basics}: SQLAlchemy maps Python classes to tables so you can query without handwritten SQL.
+    \item \textbf{API fundamentals}: Keep authentication and headers centralised; persist raw responses before transforming.
+    \item \textbf{Parallelism}: Use processes for CPU-bound workloads; threads help when the bottleneck is I/O.
+    \item \textbf{Amdahl's law}: Speedup is limited by the serial fraction; profile before parallelising.
+    \item \textbf{Web architecture}: Separate routes (HTTP) from analysis functions so you can test logic without a server.
+\end{itemize}
+
+\section*{Prerequisites and Setup}
+Use the same environment from Session 3 or create a fresh one. The examples assume you have already generated the shared dataset with \texttt{make data}.
+\begin{lstlisting}[language=bash]
+# Install dependencies into your active environment
+pip install -r requirements.txt
+
+# Prepare shared data produced in Session 3
+make data
+\end{lstlisting}
+
+\section*{How to Run the Examples}
+\begin{enumerate}
+    \item Persist CSV data to SQLite:
+    \begin{lstlisting}[language=bash]
+python session4/01_database.py
+# Creates research_data.db and writes statistics + CSV export
+    \end{lstlisting}
+    \item Collect and analyze API data (mocked for offline use):
+    \begin{lstlisting}[language=bash]
+python session4/02_api_integration.py
+# Produces weather_analysis_data.csv for later use
+    \end{lstlisting}
+    \item Compare sequential vs parallel workloads:
+    \begin{lstlisting}[language=bash]
+python session4/03_parallel_processing.py
+# Observe speedup and verify identical results across modes
+    \end{lstlisting}
+    \item Explore the dashboard (demo or server):
+    \begin{lstlisting}[language=bash]
+python session4/04_research_dashboard.py
+# or run a local server
+flask -{}-app session4/04_research_dashboard.py run -{}-port 5000
+    \end{lstlisting}
+    \item Tie everything together and generate a report:
+    \begin{lstlisting}[language=bash]
+python session4/05_integration_demo.py
+# Writes integrated_system_report.json
+    \end{lstlisting}
+\end{enumerate}
+
+\section*{Lab Guide}
+\subsection*{01\_database.py}
+\begin{itemize}
+    \item Defines SQLAlchemy models and a helper class to ingest DataFrames.
+    \item Adds data in batch and computes basic per-parameter statistics.
+    \item Exports an experiment to CSV for downstream tools.
+\end{itemize}
+
+\subsection*{02\_api\_integration.py}
+\begin{itemize}
+    \item Demonstrates a simple API client pattern with a session and headers.
+    \item Uses the free Open-Meteo weather API when the network is available, and falls back to deterministic mock data otherwise.
+    \item Produces a tidy CSV for reuse in plotting or dashboards.
+\end{itemize}
+
+\subsection*{03\_parallel\_processing.py}
+\begin{itemize}
+    \item Benchmarks sequential vs parallel Monte Carlo simulations.
+    \item Shows chunked batch processing with and without processes.
+    \item Emphasises correctness: compare results across modes before celebrating speed.
+\end{itemize}
+
+\subsection*{04\_research\_dashboard.py}
+\begin{itemize}
+    \item Minimal Flask app exposing analysis as HTML/JSON.
+    \item Generates plots in-memory and returns base64-encoded PNGs.
+    \item Includes endpoints to analyze, plot, export, and list experiments.
+\end{itemize}
+
+\subsection*{05\_integration\_demo.py}
+\begin{itemize}
+    \item Generates a small dataset, writes it to CSV and SQLite, and combines it with mock API data.
+    \item Runs a few parallel jobs, creates plots, and writes a concise JSON integration report.
+\end{itemize}
+
+\section*{Best Practices}
+
+\subsection{Error Handling}
+\begin{itemize}
+    \item Database: check connections, wrap commits in \texttt{try/except}, and roll back on failure.
+    \item APIs: set timeouts, catch \texttt{requests} exceptions, and log raw payloads before transforming.
+    \item Parallel jobs: handle exceptions inside worker functions and return error details to the parent.
+    \item Flask: validate inputs from \texttt{request.json} and return proper status codes.
+\end{itemize}
+
+\subsection{Documentation}
+\begin{itemize}
+    \item Document ORM models (field purpose/units) and any expected CSV schema.
+    \item Record API endpoints, auth method, and rate limits near the client class.
+    \item Include CLI examples (copy/paste) for each module; keep \texttt{--help} informative.
+\end{itemize}
+
+\section*{Common Pitfalls}
+\begin{itemize}
+    \item Activate your virtual environment before running the Flask CLI; otherwise \texttt{flask} may not find dependencies.
+    \item If \texttt{engineering\_test\_data.csv} is missing, run \texttt{make data} to regenerate the shared dataset.
+    \item Firewall prompts can block the Flask server from binding to a port; allow local connections if prompted.
+\end{itemize}
+
+\section*{More Examples}
+
+\noindent Persist correlations after database ingest:
+\begin{lstlisting}[language=Python]
+df = db.get_experiment_data("thermal_study_001")
+num = df.pivot_table(index="timestamp", columns="parameter", values="value")
+num.corr().to_csv("correlations.csv")
+\end{lstlisting}
+\noindent Simple parallel parameter sweep skeleton:
+\begin{lstlisting}[language=Python]
+from concurrent.futures import ProcessPoolExecutor
+def simulate(param):
+    # compute something CPU-bound
+    return param, param**2
+with ProcessPoolExecutor() as ex:
+    results = list(ex.map(simulate, range(8)))
+\end{lstlisting}
+
+\section*{Practice Exercises}
+\begin{enumerate}
+    \item Add a new SQLAlchemy model that stores computed rolling means, then write a short script to populate it.
+    \item Replace the mock weather generator with a free API of your choice (for example, Open-Meteo), and save raw JSON before flattening to CSV.
+    \item Extend the dashboard with one extra route that returns a correlation heatmap as a PNG.
+\end{enumerate}
+
+\section*{Further Reading}
+\begin{itemize}
+    \item Official Python documentation: \url{https://docs.python.org/3/}
+    \item pandas documentation (data analysis): \url{https://pandas.pydata.org/docs/}
+    \item SQLAlchemy documentation (databases): \url{https://docs.sqlalchemy.org/}
+    \item Flask documentation (web apps): \url{https://flask.palletsprojects.com/}
+    \item Open-Meteo API docs (example of a free, research-friendly API):\\\url{https://open-meteo.com/en/docs}
+\end{itemize}
+
+\clearpage
+\section*{Appendix: Full Code Listings}
+
+\subsection*{session4/01\_database.py}
+\lstinputlisting[language=Python, caption={SQLAlchemy database integration}]{session4/01_database.py}
+
+\subsection*{session4/02\_api\_integration.py}
+\lstinputlisting[language=Python, caption={API integration (mock weather and materials)}]{session4/02_api_integration.py}
+
+\subsection*{session4/03\_parallel\_processing.py}
+\lstinputlisting[language=Python, caption={Parallel processing and Monte Carlo}]{session4/03_parallel_processing.py}
+
+\subsection*{session4/04\_research\_dashboard.py}
+\lstinputlisting[language=Python, caption={Research dashboard with Flask}]{session4/04_research_dashboard.py}
+
+\subsection*{session4/05\_integration\_demo.py}
+\lstinputlisting[language=Python, caption={Integration demo: DB + APIs + parallel}]{session4/05_integration_demo.py}
+
+\end{document}

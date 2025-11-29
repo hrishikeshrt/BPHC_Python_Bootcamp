@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Research Database Integration
-SQLAlchemy ORM for research data management
+Research Database Integration (advanced / optional)
+
+This script uses SQLAlchemy (an Object-Relational Mapper)
+to talk to a SQLite database. It is here to show what a
+more `real world' database layer can look like.
+
+If you are new to Python, you do not need to understand
+every line - you can simply run the script once to see
+that experiments and data points are stored in a database.
 
 @author: Hrishikesh Terdalkar
 """

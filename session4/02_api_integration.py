@@ -1,8 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-API Integration for Research Data
-Working with REST APIs for data acquisition
+API Integration for Research Data (intermediate)
+
+This file shows a small, structured way to:
+- call a free weather API (Open-Meteo) when network access is available
+- fall back to local mock data if the request fails
+- turn JSON-like responses into pandas DataFrames
+- do a bit of trend analysis.
+
+It also includes a small material-properties client that uses only
+local mock data, plus a template for APIs that expect bearer tokens.
+
+Treat the helper classes as ready-made tools - the main focus is the
+high-level flow in `demonstrate_api_integration()`.
 
 @author: Hrishikesh Terdalkar
 """
@@ -72,14 +83,52 @@ class WeatherDataCollector(ResearchDataAPI):
     """Collect weather data for environmental studies"""
 
     def __init__(self, api_key=None):
-        # Using OpenWeatherMap API structure
-        super().__init__("http://api.openweathermap.org/data/2.5", api_key)
+        # Use the free Open-Meteo API for live data when possible.
+        # Documentation: https://open-meteo.com/en/docs
+        super().__init__("https://api.open-meteo.com/v1", api_key)
+
+    @staticmethod
+    def _city_to_coordinates(city, country_code=None):
+        """Map a few example cities to coordinates required by Open-Meteo"""
+        key = f"{city},{country_code}".lower() if country_code else city.lower()
+        mapping = {
+            "london,uk": (51.5074, -0.1278),
+            "london": (51.5074, -0.1278),
+            "mumbai,in": (19.0760, 72.8777),
+            "mumbai": (19.0760, 72.8777),
+            "hyderabad,in": (17.3850, 78.4867),
+            "hyderabad": (17.3850, 78.4867),
+        }
+        return mapping.get(key, (51.5074, -0.1278))  # default: London
 
     def get_current_weather(self, city, country_code=None):
-        """Get current weather data (mock implementation)"""
-        # Mock data for demonstration - in real implementation, use actual API
-        city_label = f"{city},{country_code}" if country_code else city
+        """Get current weather data using Open-Meteo, with mock fallback"""
+        lat, lon = self._city_to_coordinates(city, country_code)
 
+        params = {
+            "latitude": lat,
+            "longitude": lon,
+            "current_weather": "true",
+        }
+
+        raw = self.make_request("forecast", params=params, method="GET")
+
+        if raw and "current_weather" in raw:
+            cw = raw["current_weather"]
+            processed = {
+                "city": city,
+                "temperature": cw.get("temperature"),
+                "pressure": None,  # Open-Meteo current_weather does not include pressure
+                "humidity": None,
+                "wind_speed": cw.get("windspeed"),
+                "conditions": "N/A",
+                "timestamp": datetime.fromisoformat(
+                    cw.get("time")
+                ).isoformat(),
+            }
+            return processed
+
+        # Fallback: local mock if API is unreachable or response incomplete
         mock_data = {
             "weather": [{"main": "Clear", "description": "clear sky"}],
             "main": {
@@ -172,7 +221,8 @@ class MaterialPropertiesAPI(ResearchDataAPI):
     """Mock API for material properties data"""
 
     def __init__(self):
-        super().__init__("https://api.materialsproject.org", "mock_key")
+        # Uses only local mock data; URL and key are placeholders.
+        super().__init__("https://example.com/materials-api", "demo_key")
 
         # Mock material database
         self.materials_db = {
