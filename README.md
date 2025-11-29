@@ -1,6 +1,6 @@
 # BPHC Python Bootcamp (Sessions 3 & 4)
 
-Hands-on material for the advanced half of the BPHC Python bootcamp. Session 3 focuses on strengthening day-to-day research scripting, while Session 4 layers databases, APIs, parallel processing, and dashboards on top of the same datasets.
+Hands-on material for the second half of the BPHC Python bootcamp. Session 3 focuses on strengthening day-to-day research scripting, while Session 4 layers databases, APIs, parallel processing, and dashboards on top of the same datasets.
 
 ## Prerequisites
 - Python 3.10+
